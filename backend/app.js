@@ -2,6 +2,16 @@ const express = require("express");
 const PORT = process.env.PORT || 5000;
 const app = express();
 require("./db");
+
+process.on("uncaughtException", (err) => {
+  console.error("💥 Uncaught Exception:", err);
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("💥 Unhandled Rejection at:", promise, "reason:", reason);
+});
+
+
 const productRoute = require("./routes/product");
 const authRoute = require("./routes/auth");
 const path = require("path");
