@@ -1,38 +1,37 @@
 const express = require("express");
 const router = express.Router();
+const pool = require("../db");
 
-const mongoose = require("mongoose");
-const Product = require("../model/ProductModal");
-const Category = require("../model/CatModal");
-
-// Get all products
-router.get("/product", (req, res) => {
-  Product.find()
-    .then((products) => res.json(products))
-    .catch((err) =>
-      res.status(404).json({ nopostsfound: "No product found" })
-    );
+router.get("/product", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM products");
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch products" });
+  }
 });
 
-// Get all category name
-router.get("/category", (req, res) => {
-  Category.find()
-    .then((category) => res.json(category))
-    .catch((err) =>
-      res.status(404).json({ nocatsfound: "No Category found" })
-    );
+router.get("/category", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM categories");
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch categories" });
+  }
 });
 
-// Get all product by specific category name
-router.get("/product/:cat_name", (req, res) => {
-  Product.find({ routeName: req.params["cat_name"] })
-    .then((product) => res.json(product))
-    .catch((err) =>
-      res.status(404).json({ nocatsfound: "No product found" })
+router.get("/product/:cat_name", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM products WHERE category = $1",
+      [req.params.cat_name]
     );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch product by category" });
+  }
 });
 
-// Test route
 router.get("/", (req, res) => {
   res.json({ message: "API /api/v1/ works!" });
 });
