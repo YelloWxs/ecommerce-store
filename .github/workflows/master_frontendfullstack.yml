@@ -1,4 +1,4 @@
-name: Build and deploy React frontend to Azure Web App - frontendfullstack 
+name: Build and deploy React frontend to Azure Web App - frontendfullstack
 
 on:
   push:
@@ -25,7 +25,6 @@ jobs:
           node-version: '20.x'
 
       - name: Install dependencies and build
-        working-directory: frontend
         run: |
           cd frontend
           npm install
@@ -37,4 +36,4 @@ jobs:
           app-name: 'frontendfullstack'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: build
+          package: frontend/build
