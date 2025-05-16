@@ -8,22 +8,18 @@ const Category = require("../model/CatModal");
 // Get all products
 router.get("/product", (req, res) => {
   Product.find()
-    .then((products) => res.json([]))
+    .then((products) => res.json(products))
     .catch((err) =>
-      res.status(404).json({
-        nopostsfound: "No product found",
-      })
+      res.status(404).json({ nopostsfound: "No product found" })
     );
 });
 
-// Get all  category name
+// Get all category name
 router.get("/category", (req, res) => {
   Category.find()
-    .then((category) => res.json([]))
+    .then((category) => res.json(category))
     .catch((err) =>
-      res.status(404).json({
-        nocatsfound: "No Category found",
-      })
+      res.status(404).json({ nocatsfound: "No Category found" })
     );
 });
 
@@ -32,15 +28,11 @@ router.get("/product/:cat_name", (req, res) => {
   Product.find({ routeName: req.params["cat_name"] })
     .then((product) => res.json(product))
     .catch((err) =>
-      res.status(404).json({
-        nocatsfound: "No product found",
-      })
+      res.status(404).json({ nocatsfound: "No product found" })
     );
 });
 
-
-const router = require("express").Router();
-
+// Test route
 router.get("/", (req, res) => {
   res.json({ message: "API /api/v1/ works!" });
 });
