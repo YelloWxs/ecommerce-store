@@ -38,4 +38,11 @@ router.get("/product/:cat_name", (req, res) => {
     );
 });
 
+
+const router = require("express").Router();
+
+router.get("/", (req, res) => {
+  res.json({ message: "API /api/v1/ works!" });
+});
+
 module.exports = router;
