@@ -16,7 +16,8 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -34,7 +35,5 @@ jobs:
         with:
           app-name: 'frontendfullstack'
           slot-name: 'Production'
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: frontend/build
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_48FC97FA40B44FAB924BE9B3D4C31960 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_53D89EA34F57430F9158033F2D12E7AE }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_8181A0475A014F5B9D3055BD70EAF38F }}
