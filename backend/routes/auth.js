@@ -1,62 +1,58 @@
 const express = require("express");
 const router = express.Router();
-const User = require("../model/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const pool = require("../db");
 const { registerValidation, loginValidation } = require("../validation");
+
 router.post("/register", async (req, res) => {
   const { error } = registerValidation(req.body);
-  // console.log(req.body);
-
-  if (error) {
-    return res.status(400).send(error.details[0].message);
-  }
-
-  const isUserExist = await User.findOne({ email: req.body.email });
-  if (isUserExist) {
-    return res.status(400).send("user exist");
-  }
-
-  const salt = await bcrypt.genSalt(10);
-  const hashPassword = await bcrypt.hash(req.body.password, salt);
-  const newUser = {
-    name: req.body.name,
-    email: req.body.email,
-    password: hashPassword,
-  };
-
-  const user = new User(newUser);
+  if (error) return res.status(400).send(error.details[0].message);
 
   try {
-    await user.save();
-    res.status(200).send({ user: user._id });
-  } catch (error) {
-    res.status(400).send(error);
+    const existingUser = await pool.query(
+      "SELECT * FROM users WHERE email = $1",
+      [req.body.email]
+    );
+
+    if (existingUser.rows.length > 0) {
+      return res.status(400).send("user exist");
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashPassword = await bcrypt.hash(req.body.password, salt);
+
+    const newUser = await pool.query(
+      "INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id",
+      [req.body.name, req.body.email, hashPassword]
+    );
+
+    res.status(200).send({ user: newUser.rows[0].id });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
   }
 });
 
 router.post("/login", async (req, res) => {
   const { error } = loginValidation(req.body);
-  if (error) {
-    return res.status(400).send(error.details[0].message);
-  }
-  const isUserExist = await User.findOne({ email: req.body.email });
+  if (error) return res.status(400).send(error.details[0].message);
 
-  if (!isUserExist) {
-    return res.status(400).send({ msg: "user does not exist" });
-  }
+  try {
+    const result = await pool.query("SELECT * FROM users WHERE email = $1", [req.body.email]);
+    const user = result.rows[0];
 
-  //password is correct
-  const validPass = await bcrypt.compare(
-    req.body.password,
-    isUserExist.password
-  );
-  if (!validPass) {
-    return res.status(400).send("email or password wrong");
-  }
+    if (!user) return res.status(400).send({ msg: "user does not exist" });
 
-  // create token
-  const token = jwt.sign({ _id: isUserExist._id }, process.env.SECRET_KEY);
-  res.header("auth-token", token).send({ token, user: isUserExist });
+    const validPass = await bcrypt.compare(req.body.password, user.password);
+    if (!validPass) return res.status(400).send("email or password wrong");
+
+    const token = jwt.sign({ _id: user.id }, process.env.SECRET_KEY);
+    res.header("auth-token", token).send({ token, user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
 });
+
 module.exports = router;
