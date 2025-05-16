@@ -1,40 +1,59 @@
-import React from "react";
-import "./App.css";
-import jwt_decode from "jwt-decode";
-import { setCurrentUser } from "./redux/user/user.actions";
-import store from "./redux/store";
-import { Switch, Route } from "react-router-dom";
-import MainNavigation from "./components/navigation/mainNavigation.component";
-import Footer from "./components/footer/footer.component";
-import HomePage from "./pages/homePage/homePage";
-import ShopPage from "./pages/shopPage/shopPage";
-import SignInAndSignUpPage from "./pages/sign-in-and-sign-up/sign-in-and-sign-up.component";
-import CheckoutPage from "./pages/checkout/checkout.component";
-import PrivateRoute from "./Private-route";
-if (localStorage.jwtToken) {
-  // set auth tioken
-  // setAuthToken(localStorage.jwtToken);
-  // decode token
-  const decoded = jwt_decode(localStorage.jwtToken);
-  store.dispatch(setCurrentUser(decoded));
-}
+import React, { useState } from 'react';
+
+const API_URL = "https://backendfullstack-d5c6fvfmc9d4c2gm.francecentral-01.azurewebsites.net";
 
 function App() {
+  const [form, setForm] = useState({ name: '', email: '', password: '' });
+  const [result, setResult] = useState(null);
+
+  const handleChange = e => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleRegister = async () => {
+    const res = await fetch(`${API_URL}/api/v1/user/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form),
+    });
+    const data = await res.json();
+    setResult(data);
+  };
+
+  const handleLogin = async () => {
+    const res = await fetch(`${API_URL}/api/v1/user/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: form.email, password: form.password }),
+    });
+    const data = await res.json();
+    setResult(data);
+  };
+
   return (
-    <div className="App">
-      <MainNavigation />
-      <div className="main">
-        <Switch>
-          <Route path="/" component={HomePage} exact />
-          <Route path="/shop" component={ShopPage} />
-          <PrivateRoute path="/checkout" component={CheckoutPage} />
-          <Route path="/signin" component={SignInAndSignUpPage} />
-        </Switch>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
+      <h1 className="text-2xl font-bold mb-4">💳 Fullstack eCommerce Auth</h1>
+
+      <div className="bg-white p-6 rounded shadow-md w-full max-w-md space-y-4">
+        <input name="name" placeholder="Name" onChange={handleChange} className="border p-2 w-full" />
+        <input name="email" placeholder="Email" onChange={handleChange} className="border p-2 w-full" />
+        <input name="password" type="password" placeholder="Password" onChange={handleChange} className="border p-2 w-full" />
+
+        <div className="flex gap-4">
+          <button onClick={handleRegister} className="bg-blue-500 text-white px-4 py-2 rounded">Register</button>
+          <button onClick={handleLogin} className="bg-green-500 text-white px-4 py-2 rounded">Login</button>
+        </div>
       </div>
 
-      <Footer />
+      {result && (
+        <pre className="mt-6 text-sm bg-gray-200 p-4 rounded max-w-md w-full overflow-x-auto">
+          {JSON.stringify(result, null, 2)}
+        </pre>
+      )}
     </div>
   );
 }
 
 export default App;
+
+
