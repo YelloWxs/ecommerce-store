@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies and build
         working-directory: frontend
         run: |
-          npm ci
+          npm install
           npm run build
 
       - name: Deploy to Azure Web App
