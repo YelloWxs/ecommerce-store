@@ -1,12 +1,11 @@
-const mongoose = require("mongoose");
-require("dotenv").config(); // correction du require
+const { Pool } = require('pg');
+require('dotenv').config();
 
-mongoose.connect(process.env.DB_CONNECTION, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-  .then(() => console.log("✅ Connected to MongoDB"))
-  .catch((err) => {
-    console.error("❌ MongoDB connection error:", err);
-    process.exit(1); // stoppe l'app si DB inaccessible
-  });
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+
+module.exports = pool;
