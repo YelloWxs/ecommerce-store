@@ -4,11 +4,11 @@ const app = express();
 require("./db");
 
 process.on("uncaughtException", (err) => {
-  console.error("💥 Uncaught Exception:", err);
+  console.error("Uncaught Exception:", err);
 });
 
 process.on("unhandledRejection", (reason, promise) => {
-  console.error("💥 Unhandled Rejection at:", promise, "reason:", reason);
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
 });
 
 
@@ -42,5 +42,10 @@ if (process.env.NODE_ENV === "production") {
 }
 // listen to the port
 app.listen(PORT, () => {
-  console.log(`✅ Server is running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
+
+app.get("/", (req, res) => {
+  res.send("Backend is running as it should !");
+});
+
